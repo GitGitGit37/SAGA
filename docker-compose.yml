@@ -16,5 +16,44 @@ services:
       timeout: 3s
       retries: 20
 
+  backend:
+    build: ./backend
+    container_name: cattrack-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-cattrack}:${POSTGRES_PASSWORD:-cattrack}@db:5432/${POSTGRES_DB:-cattrack}
+      WATCHFILES_FORCE_POLLING: "true"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/config:/app/config
+      - ./backend/seed:/app/seed
+      - ./backend/tests:/app/tests
+      - modelcache:/app/.cache
+
+  frontend:
+    image: node:22-alpine
+    container_name: cattrack-frontend
+    working_dir: /app
+    command: sh -c "npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:8000
+      VITE_POLL: "true"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+
 volumes:
   pgdata:
+  modelcache:
+  node_modules:
