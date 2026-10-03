@@ -16,10 +16,13 @@ feedback:
   reliability_learning_rate: 0.2  # step size when later data confirms/refutes a feedback item
   revision_margin: 0.15           # alternative must beat current score by this much to revise
   rationale_required_for: [reject, correct]
+  confirm_threshold: 0.6          # combined score needed for a "confirm" to mark an inference confirmed
+  verdict_min_evidence: 0.7       # later data must be at least this decisive to judge past feedback
 
 safety:
-  categories: [safety]            # never suppressed by feedback; contested items escalate
-  min_fault_severity: 4           # any severity >= this marks the inference safety-critical
+  categories: [safety]            # never suppressed by feedback; contested items escalate.
+                                  # A fault code whose lookup category is listed here, or a note
+                                  # reporting steering/brake symptoms, marks the inference safety-critical.
 
 base_rate:
   prior: 0.5                      # used when there is no feedback history yet
