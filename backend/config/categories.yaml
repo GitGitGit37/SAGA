@@ -1,0 +1,26 @@
+# Categories an observation or inference can be assigned to.
+categories:
+  engine_health:
+    description: "Engine internals, cooling, lubrication, fuel system."
+    subsystems: [engine, cooling_system]
+  hydraulics:
+    description: "Hydraulic pumps, hoses, cylinders, oil condition."
+    subsystems: [hydraulics]
+  operator_behavior:
+    description: "How the machine is operated: idling, overspeed, harsh use."
+    subsystems: [operator]
+  environmental_condition:
+    description: "Ambient temperature, dust, terrain, weather affecting the machine."
+    subsystems: [environment]
+  maintenance_event:
+    description: "Service, repair, part replacement, inspection performed."
+    subsystems: [engine, cooling_system, hydraulics, electrical, aftertreatment, undercarriage]
+  safety:
+    description: "Conditions that put people or the machine at immediate risk."
+    subsystems: [engine, hydraulics, brakes, steering, electrical]
+  electrical:
+    description: "Batteries, alternator, wiring, sensors."
+    subsystems: [electrical]
+  emissions:
+    description: "DPF, DEF/SCR aftertreatment."
+    subsystems: [aftertreatment]

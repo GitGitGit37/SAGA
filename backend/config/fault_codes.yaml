@@ -1,0 +1,77 @@
+# Fault code lookup. Codes are modeled on SAE J1939 SPN-FMI pairs and are
+# illustrative for the demo, not an official Caterpillar code list.
+# severity: 1 (informational) .. 4 (stop machine / safety).
+
+codes:
+  "110-15":
+    description: "Engine coolant temperature high - least severe"
+    subsystem: cooling_system
+    category: engine_health
+    severity: 2
+    typical_causes: ["Radiator core blocked by debris", "Low coolant level", "High ambient temperature with heavy load"]
+  "110-16":
+    description: "Engine coolant temperature high - moderately severe"
+    subsystem: cooling_system
+    category: engine_health
+    severity: 3
+    typical_causes: ["Radiator core blocked by debris", "Failed thermostat", "Fan drive slipping", "Low coolant level"]
+  "110-0":
+    description: "Engine coolant temperature high - most severe (engine derate)"
+    subsystem: cooling_system
+    category: engine_health
+    severity: 4
+    typical_causes: ["Coolant loss", "Water pump failure", "Severely blocked radiator"]
+  "100-17":
+    description: "Engine oil pressure low - least severe"
+    subsystem: engine
+    category: engine_health
+    severity: 2
+    typical_causes: ["Low oil level", "Oil dilution", "Worn oil pump"]
+  "100-1":
+    description: "Engine oil pressure low - most severe"
+    subsystem: engine
+    category: safety
+    severity: 4
+    typical_causes: ["Oil pump failure", "Major oil leak", "Bearing wear"]
+  "1638-16":
+    description: "Hydraulic oil temperature high - moderately severe"
+    subsystem: hydraulics
+    category: hydraulics
+    severity: 3
+    typical_causes: ["Low hydraulic oil level", "Internal leakage / bypass", "Hydraulic cooler blocked"]
+  "1762-18":
+    description: "Hydraulic system pressure low - moderately severe"
+    subsystem: hydraulics
+    category: hydraulics
+    severity: 3
+    typical_causes: ["External leak at hose or cylinder seal", "Worn pump", "Relief valve stuck open"]
+  "1762-1":
+    description: "Hydraulic system pressure low - most severe (steering/implement control at risk)"
+    subsystem: hydraulics
+    category: safety
+    severity: 4
+    typical_causes: ["Major hose rupture", "Pump failure", "Severe fluid loss"]
+  "3719-16":
+    description: "DPF soot load high - moderately severe"
+    subsystem: aftertreatment
+    category: emissions
+    severity: 2
+    typical_causes: ["Excessive idling prevents passive regeneration", "Interrupted regeneration cycles"]
+  "1761-17":
+    description: "DEF tank level low"
+    subsystem: aftertreatment
+    category: emissions
+    severity: 1
+    typical_causes: ["DEF not refilled"]
+  "168-17":
+    description: "Battery voltage low - least severe"
+    subsystem: electrical
+    category: electrical
+    severity: 2
+    typical_causes: ["Weak battery", "Alternator belt slipping", "Parasitic draw"]
+  "190-0":
+    description: "Engine overspeed - most severe"
+    subsystem: engine
+    category: safety
+    severity: 4
+    typical_causes: ["Downhill overspeed in gear", "Governor fault"]
