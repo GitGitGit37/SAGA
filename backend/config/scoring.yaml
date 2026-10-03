@@ -18,8 +18,9 @@ feedback:
   rationale_required_for: [reject, correct]
 
 safety:
-  categories: [safety]            # never suppressed by feedback; contested items escalate
-  min_fault_severity: 4           # any severity >= this marks the inference safety-critical
+  categories: [safety]            # never suppressed by feedback; contested items escalate.
+                                  # A fault code whose lookup category is listed here, or a note
+                                  # reporting steering/brake symptoms, marks the inference safety-critical.
 
 base_rate:
   prior: 0.5                      # used when there is no feedback history yet

@@ -13,8 +13,8 @@ human feedback as **evidence, not an override**.
 | Phase | Scope | State |
 |---|---|---|
 | 1 | docker-compose, DB schema, seed generator | done |
-| 2 | Evidence Engine + inference pipeline | next |
-| 3 | Feedback & refinement | |
+| 2 | Evidence Engine + inference pipeline | done |
+| 3 | Feedback & refinement | next |
 | 4 | Recall / "Ask the machine" | |
 | 5 | Frontend | |
 | 6 | Polish + demo script | |
@@ -40,6 +40,7 @@ pip install -e ".[dev]"
 alembic upgrade head              # create schema
 python -m seed.generate           # write synthetic data to seed/data/
 python -m seed.load --reset       # load it into Postgres
+python -m app.inference.run       # categorise + infer for every asset (--rules to skip Claude)
 uvicorn app.main:app --reload     # http://localhost:8000/health
 pytest                            # tests (no DB or API key needed)
 ```
@@ -69,18 +70,36 @@ loaded into the memory.
 
 All weights live in [`backend/config/scoring.yaml`](backend/config/scoring.yaml).
 
+**Evidence score** (deterministic, [`app/evidence/`](backend/app/evidence/))
+
+The engine turns raw data into findings: threshold breaches, fault codes (severity from the
+lookup table), trends vs the asset's own baseline, isolated spikes, IsolationForest anomalies,
+ambient temperature, same-site peer comparison, note symptoms and recorded repairs. Each
+finding supports or contradicts each *hypothesis* (degradation, acute failure, sensor fault,
+operating practice, environmental, resolved). For the hypothesis an inference asserts:
+
+```
+evidence_score = noisy_or(supporting strengths) * (1 - noisy_or(contradicting strengths))
+```
+
+capped at 0.98. That is why "it's just hot weather" scores low on EX-320-A: ambient isn't
+elevated and the other machines on site are normal, both of which contradict *environmental*.
+
 **Inference confidence**
 
 ```
 final = 0.5 * evidence_score + 0.2 * llm_verified + 0.3 * base_rate
 ```
 
-- `evidence_score` comes from the deterministic Evidence Engine: threshold rules, fault code
-  severity, and trend/anomaly detection over the asset's history.
+- `evidence_score` as above. Claude's claims never add to it.
 - `llm_verified` is Claude's stated confidence minus a penalty (0.1) for each claim it made
   that the data does not back. Unbacked claims are also dropped from the evidence list.
 - `base_rate` is how often this kind of inference has been confirmed on similar assets
   (Beta prior, so a handful of outcomes can't swing it).
+- If the engine's best hypothesis beats Claude's by more than the revision margin (0.15), the
+  engine's interpretation is stored and Claude's is kept as a recorded alternative.
+- Without an API key the rule-based proposer is used; the LLM term is then dropped and its
+  weight spread over the other two (0.625 evidence, 0.375 history).
 
 **Feedback weight**
 

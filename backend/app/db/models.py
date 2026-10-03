@@ -98,8 +98,10 @@ class Inference(Base):
 
     category: Mapped[str] = mapped_column(String(64), index=True)
     subsystem: Mapped[str | None] = mapped_column(String(64))
+    hypothesis: Mapped[str] = mapped_column(String(32), default="degradation")  # Hypothesis
     title: Mapped[str] = mapped_column(String(255))
     interpretation: Mapped[str] = mapped_column(Text)
+    recommended_action: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(32), default=InferenceStatus.active)
     is_safety_critical: Mapped[bool] = mapped_column(Boolean, default=False)
     escalated: Mapped[bool] = mapped_column(Boolean, default=False)
