@@ -30,17 +30,6 @@ class InferenceStatus(StrEnum):
     confirmed = "confirmed"
 
 
-class Hypothesis(StrEnum):
-    """What kind of explanation an inference asserts. Evidence is scored per hypothesis,
-    so the same readings can support "degradation" while contradicting "environmental"."""
-    degradation = "degradation"            # gradual wear / blockage / leak
-    acute_failure = "acute_failure"        # sudden component failure
-    sensor_fault = "sensor_fault"          # the reading is wrong, not the machine
-    operating_practice = "operating_practice"  # how the machine is being run
-    environmental = "environmental"        # ambient conditions explain it
-    resolved = "resolved"                  # a repair fixed a previously active problem
-
-
 class EvidenceKind(StrEnum):
     threshold = "threshold"          # rule check against configured limits
     fault_code = "fault_code"        # fault code lookup
@@ -48,8 +37,6 @@ class EvidenceKind(StrEnum):
     base_rate = "base_rate"          # historical confirmation rate
     llm_claim = "llm_claim"          # a claim Claude made, with verification result
     maintenance = "maintenance"      # maintenance / repair record
-    note = "note"                    # symptom or physical evidence in an operator/technician note
-    environment = "environment"      # ambient conditions and same-site peer comparison
     context = "context"              # user-supplied context backed by a record
 
 

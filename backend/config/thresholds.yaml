@@ -37,4 +37,4 @@ asset_types:
     hydraulic_oil_temp_c:   { warn: 88,  critical: 98 }
     engine_rpm_avg:         { warn: 2000, critical: 2200 }
     idle_pct:               { warn: 35,  critical: 50 }
-    fuel_rate_lph:          { warn: 33,  critical: 38 }
+    fuel_rate_lph:          { warn: 30,  critical: 38 }

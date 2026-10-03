@@ -98,10 +98,8 @@ class Inference(Base):
 
     category: Mapped[str] = mapped_column(String(64), index=True)
     subsystem: Mapped[str | None] = mapped_column(String(64))
-    hypothesis: Mapped[str] = mapped_column(String(32), default="degradation")  # Hypothesis
     title: Mapped[str] = mapped_column(String(255))
     interpretation: Mapped[str] = mapped_column(Text)
-    recommended_action: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(32), default=InferenceStatus.active)
     is_safety_critical: Mapped[bool] = mapped_column(Boolean, default=False)
     escalated: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -160,7 +158,6 @@ class Feedback(Base):
     feedback_type: Mapped[str] = mapped_column(String(32))  # FeedbackType
     rationale: Mapped[str | None] = mapped_column(Text)
     proposed_category: Mapped[str | None] = mapped_column(String(64))
-    proposed_hypothesis: Mapped[str | None] = mapped_column(String(32))
     proposed_interpretation: Mapped[str | None] = mapped_column(Text)
     attached_observation_ids: Mapped[list[int]] = mapped_column(JSONB, default=list)
 
@@ -169,9 +166,6 @@ class Feedback(Base):
     reliability_at_submission: Mapped[float | None] = mapped_column(Float)
     evidence_against: Mapped[float | None] = mapped_column(Float)
     weight: Mapped[float | None] = mapped_column(Float)
-    scores: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)  # combined-score breakdown
-    # Latest data the inference had seen when this feedback was given; later data judges it.
-    data_as_of: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     outcome: Mapped[str] = mapped_column(String(32), default=FeedbackOutcome.pending)
     system_response: Mapped[str | None] = mapped_column(Text)

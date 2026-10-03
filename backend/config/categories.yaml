@@ -1,8 +1,5 @@
 # Categories an observation or inference can be assigned to.
 categories:
-  routine_operation:
-    description: "Normal operating data with no notable findings."
-    subsystems: []
   engine_health:
     description: "Engine internals, cooling, lubrication, fuel system."
     subsystems: [engine, cooling_system]
