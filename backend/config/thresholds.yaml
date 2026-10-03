@@ -1,0 +1,40 @@
+# Operating thresholds per asset type, applied to shift-level telematics.
+# direction: "high" = alarm when value rises above limit, "low" = alarm when it falls below.
+# Values are illustrative, not official Caterpillar specifications.
+
+metrics:
+  coolant_temp_max_c:   { label: "Coolant temp (max)",       unit: "°C",  subsystem: cooling_system, direction: high }
+  oil_pressure_kpa:     { label: "Engine oil pressure",      unit: "kPa", subsystem: engine,         direction: low }
+  hydraulic_pressure_bar: { label: "Hydraulic pressure (avg)", unit: "bar", subsystem: hydraulics,   direction: low }
+  hydraulic_oil_temp_c: { label: "Hydraulic oil temp",       unit: "°C",  subsystem: hydraulics,     direction: high }
+  engine_rpm_avg:       { label: "Engine RPM (avg)",         unit: "rpm", subsystem: engine,         direction: high }
+  idle_pct:             { label: "Idle time",                unit: "%",   subsystem: operator,       direction: high }
+  fuel_rate_lph:        { label: "Fuel rate",                unit: "L/h", subsystem: engine,         direction: high }
+
+asset_types:
+  excavator:
+    coolant_temp_max_c:     { warn: 98,  critical: 105 }
+    oil_pressure_kpa:       { warn: 250, critical: 180 }
+    hydraulic_pressure_bar: { warn: 280, critical: 240 }
+    hydraulic_oil_temp_c:   { warn: 85,  critical: 95 }
+    engine_rpm_avg:         { warn: 2000, critical: 2200 }
+    idle_pct:               { warn: 35,  critical: 50 }
+    fuel_rate_lph:          { warn: 32,  critical: 40 }
+
+  wheel_loader:
+    coolant_temp_max_c:     { warn: 99,  critical: 106 }
+    oil_pressure_kpa:       { warn: 240, critical: 170 }
+    hydraulic_pressure_bar: { warn: 220, critical: 190 }
+    hydraulic_oil_temp_c:   { warn: 85,  critical: 95 }
+    engine_rpm_avg:         { warn: 1950, critical: 2150 }
+    idle_pct:               { warn: 35,  critical: 50 }
+    fuel_rate_lph:          { warn: 28,  critical: 36 }
+
+  dozer:
+    coolant_temp_max_c:     { warn: 98,  critical: 105 }
+    oil_pressure_kpa:       { warn: 260, critical: 190 }
+    hydraulic_pressure_bar: { warn: 190, critical: 160 }
+    hydraulic_oil_temp_c:   { warn: 88,  critical: 98 }
+    engine_rpm_avg:         { warn: 2000, critical: 2200 }
+    idle_pct:               { warn: 35,  critical: 50 }
+    fuel_rate_lph:          { warn: 30,  critical: 38 }

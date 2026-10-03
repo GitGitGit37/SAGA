@@ -1,0 +1,26 @@
+# Confidence math and feedback weighting. See README "Confidence math".
+
+confidence_weights:        # must sum to 1.0
+  evidence: 0.5            # deterministic Evidence Engine score
+  llm: 0.2                 # Claude's confidence, after unverified claims are removed
+  history: 0.3             # historical base rate for this category on similar assets
+
+unverified_claim_penalty: 0.1   # subtracted from LLM confidence per claim the data doesn't back
+
+feedback:
+  role_weights:
+    operator: 0.6
+    technician: 1.0
+    fleet_manager: 0.8
+  initial_reliability: 0.5
+  reliability_learning_rate: 0.2  # step size when later data confirms/refutes a feedback item
+  revision_margin: 0.15           # alternative must beat current score by this much to revise
+  rationale_required_for: [reject, correct]
+
+safety:
+  categories: [safety]            # never suppressed by feedback; contested items escalate
+  min_fault_severity: 4           # any severity >= this marks the inference safety-critical
+
+base_rate:
+  prior: 0.5                      # used when there is no feedback history yet
+  prior_strength: 4               # pseudo-counts (Beta prior) so a few outcomes don't swing it
