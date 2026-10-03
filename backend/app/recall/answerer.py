@@ -34,7 +34,7 @@ class Answer:
     generated_by: str  # claude | gemini | template
 
 
-SYSTEM = """You are the recall interface of Cat Track, a memory layer for heavy equipment. \
+SYSTEM = """You are the recall interface of Ride Along, a memory layer for heavy equipment. \
 Answer the user's question using ONLY the memories provided. Memories are inferences the \
 system has made (ids starting with I) and operator/technician notes (ids starting with O).
 

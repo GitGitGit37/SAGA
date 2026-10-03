@@ -100,7 +100,7 @@ class RuleProposer:
 # Claude
 # --------------------------------------------------------------------------- #
 
-SYSTEM_PROMPT = """You are the interpretation layer of Cat Track, a memory system for heavy \
+SYSTEM_PROMPT = """You are the interpretation layer of Ride Along, a memory system for heavy \
 equipment (Caterpillar excavators, wheel loaders, dozers). A deterministic evidence engine has \
 already analysed one machine's telematics, fault codes and maintenance notes and found SIGNALS: \
 subsystems where something is going on. Your job is to say what each signal most likely means.
@@ -174,4 +174,3 @@ class ClaudeProposer:
         result = self.llm.parse(tier="fast", system=SYSTEM_PROMPT, prompt=build_prompt(analysis),
                                 schema=ProposalSet, effort="medium")
         return result.proposals
-

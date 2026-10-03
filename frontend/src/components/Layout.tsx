@@ -15,9 +15,9 @@ export function Layout() {
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="flex shrink-0 flex-col bg-zinc-950 text-zinc-300 md:sticky md:top-0 md:h-screen md:w-60">
         <div className="flex items-center gap-2 px-5 py-5">
-          <div className="grid size-8 place-items-center rounded-md bg-amber-400 font-black text-zinc-950">CT</div>
+          <div className="grid size-8 place-items-center rounded-md bg-amber-400 font-black text-zinc-950">RA</div>
           <div>
-            <div className="text-sm font-semibold text-white">Cat Track</div>
+            <div className="text-sm font-semibold text-white">Ride Along</div>
             <div className="text-[11px] text-zinc-500">Memory for physical AI</div>
           </div>
         </div>

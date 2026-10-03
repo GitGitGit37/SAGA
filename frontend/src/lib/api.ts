@@ -1,4 +1,4 @@
-// Typed client for the Cat Track API (/api, proxied by Vite to the backend).
+// Typed client for the Ride Along API (/api, proxied by Vite to the backend).
 
 export type User = { id: number; name: string; role: string; reliability: number };
 

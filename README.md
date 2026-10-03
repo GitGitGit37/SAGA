@@ -1,7 +1,7 @@
-# Cat Track (SAGA)
+# Ride Along (SAGA)
 
 A persistent, self-improving memory layer for physical assets, built for Caterpillar's
-"Memory for Physical AI" challenge. Every machine gets a memory: Cat Track ingests telematics,
+"Memory for Physical AI" challenge. Every machine gets a memory: Ride Along ingests telematics,
 fault codes and maintenance notes, infers what they mean, stores each inference as a versioned
 memory with its evidence, answers natural-language questions from that memory, and takes
 human feedback as **evidence, not an override**.

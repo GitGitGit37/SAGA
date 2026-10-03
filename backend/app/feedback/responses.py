@@ -47,7 +47,7 @@ class HoldReply(BaseModel):
     data_requests: list[str] = Field(description="Specific data that would settle the disagreement.")
 
 
-SYSTEM = """You are Cat Track, a maintenance memory system for heavy equipment, replying to \
+SYSTEM = """You are Ride Along, a maintenance memory system for heavy equipment, replying to \
 a person who gave feedback on one of your inferences. The decision has already been made by \
 the evidence engine; you are explaining it, not re-deciding it.
 
