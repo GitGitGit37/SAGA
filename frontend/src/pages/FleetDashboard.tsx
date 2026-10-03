@@ -4,7 +4,9 @@ import { ConfidencePill, ErrorBox, HealthBadge, Loading, PageHeader, StatusBadge
 import { Card } from "@/components/ui/card";
 import { api, type AssetSummary } from "@/lib/api";
 import { useLoad } from "@/lib/hooks";
+import { useSession } from "@/lib/session";
 import { fmtDate, humanize } from "@/lib/utils";
+import { RenterHome } from "@/pages/RenterExperience";
 
 const HEALTH_ORDER = { critical: 0, warning: 1, ok: 2 };
 
@@ -85,6 +87,11 @@ function AssetCard({ a }: { a: AssetSummary }) {
 }
 
 export function FleetDashboard() {
+  const { viewMode } = useSession();
+  return viewMode === "renter" ? <RenterHome /> : <StaffFleetDashboard />;
+}
+
+function StaffFleetDashboard() {
   const { data, error, loading } = useLoad(api.assets, []);
   if (error) return <ErrorBox error={error} />;
   if (loading || !data) return <Loading />;

@@ -14,6 +14,7 @@ import { api, type AssetDetail, type TimelineEvent } from "@/lib/api";
 import { useLoad } from "@/lib/hooks";
 import { useSession } from "@/lib/session";
 import { cn, fmtDate, fmtDateTime, humanize, llmLabel, pct } from "@/lib/utils";
+import { RenterMachinePage } from "@/pages/RenterExperience";
 
 const METRICS = [
   { key: "coolant_temp_max_c", label: "Coolant temp (max)", unit: "°C" },
@@ -213,6 +214,11 @@ function Row({ icon, at, kind, children }: { icon: React.ReactNode; at: string; 
 
 export function AssetTimeline() {
   const { tag = "" } = useParams();
+  const { viewMode } = useSession();
+  return viewMode === "renter" ? <RenterMachinePage tag={tag} /> : <StaffAssetTimeline tag={tag} />;
+}
+
+function StaffAssetTimeline({ tag }: { tag: string }) {
   const { data: d, error, loading, reload } = useLoad(() => api.asset(tag), [tag]);
   const { meta } = useSession();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
