@@ -96,7 +96,7 @@ def _claim_evidence(vc: VerifiedClaim) -> EvidenceDraft:
 
 
 def score_proposal(p: Proposal, analysis: Analysis, base_rate_fn: BaseRateFn,
-                   *, llm_used: bool) -> tuple[InferenceDraft, list[VerifiedClaim]]:
+                   *, llm_used: bool, llm_name: str = "claude") -> tuple[InferenceDraft, list[VerifiedClaim]]:
     ctx = analysis.ctx
     signal = analysis.signal(p.subsystem)
     hs = signal.score(p.hypothesis)
@@ -127,7 +127,7 @@ def score_proposal(p: Proposal, analysis: Analysis, base_rate_fn: BaseRateFn,
         window_end=ctx.as_of,
         confidence=breakdown,
         evidence=evidence,
-        proposer="claude" if llm_used else "rules",
+        proposer=llm_name if llm_used else "rules",
     )
     return draft, claims
 
@@ -148,7 +148,7 @@ def build_drafts(analysis: Analysis, proposer: Proposer, base_rate_fn: BaseRateF
         if p.subsystem not in signal_subsystems:
             log.info("dropping proposal for %s: engine has no signal there", p.subsystem)
             continue
-        draft, _ = score_proposal(p, analysis, base_rate_fn, llm_used=llm_used)
+        draft, _ = score_proposal(p, analysis, base_rate_fn, llm_used=llm_used, llm_name=proposer.name)
 
         # The engine gets a vote: if its best hypothesis beats the proposal's by the margin,
         # its interpretation wins and the LLM's is recorded as an alternative.

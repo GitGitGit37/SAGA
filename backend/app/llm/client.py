@@ -1,6 +1,6 @@
-"""Thin wrapper around the Anthropic SDK for structured (Pydantic-validated) output.
+"""Thin wrappers around the Anthropic and Gemini SDKs for structured (Pydantic-validated) output.
 
-Everything that talks to Claude goes through StructuredLLM, so tests can swap in a fake.
+Everything that talks to an LLM goes through StructuredLLM, so tests can swap in a fake.
 """
 
 from __future__ import annotations
@@ -30,6 +30,8 @@ class StructuredLLM(Protocol):
 
 
 class ClaudeLLM:
+    name = "claude"
+
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or get_settings()
         if not self.settings.anthropic_api_key:
@@ -73,9 +75,62 @@ class ClaudeLLM:
         return response.parsed_output
 
 
+class GeminiLLM:
+    name = "gemini"
+
+    def __init__(self, settings: Settings | None = None):
+        self.settings = settings or get_settings()
+        if not self.settings.gemini_api_key:
+            raise LLMError("GEMINI_API_KEY is not set")
+        from google import genai
+
+        self.client = genai.Client(api_key=self.settings.gemini_api_key)
+
+    def model_for(self, tier: Tier) -> str:
+        return self.settings.gemini_fast_model if tier == "fast" else self.settings.gemini_reasoning_model
+
+    def parse(self, *, tier: Tier, system: str, prompt: str, schema: type[T],
+              effort: Effort = "medium", max_tokens: int = 16000) -> T:
+        from google.genai import errors, types
+
+        model = self.model_for(tier)
+        try:
+            response = self.client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system,
+                    max_output_tokens=max_tokens,
+                    response_mime_type="application/json",
+                    response_json_schema=schema.model_json_schema(),
+                ),
+            )
+        except errors.APIError as exc:
+            raise LLMError(f"Gemini API error {exc.code}: {exc.message}") from exc
+        except Exception as exc:  # network errors surface as httpx exceptions
+            raise LLMError(f"could not reach Gemini API: {exc}") from exc
+
+        finish = response.candidates[0].finish_reason if response.candidates else None
+        if finish == types.FinishReason.MAX_TOKENS:
+            raise LLMError(f"response hit max_tokens={max_tokens}")
+        if not response.text:
+            raise LLMError(f"Gemini returned no output (finish reason {finish})")
+        try:
+            parsed = schema.model_validate_json(response.text)
+        except ValueError as exc:
+            raise LLMError(f"Gemini output did not match the schema: {exc}") from exc
+        usage = response.usage_metadata
+        log.info("gemini %s: %s in / %s out tokens", model,
+                 getattr(usage, "prompt_token_count", None), getattr(usage, "candidates_token_count", None))
+        return parsed
+
+
 def get_llm() -> StructuredLLM | None:
-    """Claude if an API key is configured, else None (callers fall back to rules)."""
-    try:
-        return ClaudeLLM()
-    except LLMError:
-        return None
+    """Claude or Gemini, whichever has an API key (Claude first), else None (callers fall back to rules)."""
+    settings = get_settings()
+    for cls in (ClaudeLLM, GeminiLLM):
+        try:
+            return cls(settings)
+        except LLMError:
+            continue
+    return None

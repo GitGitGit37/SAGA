@@ -22,7 +22,7 @@ human feedback as **evidence, not an override**.
 ## Quick start (Docker only)
 
 ```bash
-cp .env.example .env      # optional: set ANTHROPIC_API_KEY to use Claude
+cp .env.example .env      # optional: set ANTHROPIC_API_KEY (Claude) or GEMINI_API_KEY (Gemini)
 docker compose up -d      # Postgres + pgvector, FastAPI backend, React frontend
 ```
 

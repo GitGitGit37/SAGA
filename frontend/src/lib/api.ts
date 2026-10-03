@@ -153,6 +153,7 @@ export type InferenceDetail = Inference & {
 
 export type Meta = {
   llm_enabled: boolean;
+  llm_provider: string | null;
   hypotheses: string[];
   categories: string[];
   feedback_types: string[];
@@ -200,7 +201,7 @@ export type RecallResult = {
   answer: string;
   cited: string[];
   sufficient: boolean;
-  generated_by: "claude" | "template";
+  generated_by: "claude" | "gemini" | "template";
   filters: { asset_tags: string[]; subsystem: string | null; status: string | null; safety_only: boolean };
   memories: Memory[];
 };

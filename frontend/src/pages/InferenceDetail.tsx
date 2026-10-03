@@ -166,8 +166,8 @@ export function InferenceDetailPage() {
           {claims.length > 0 && d.confidence.weights.llm > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Claude's claims, checked against the data</CardTitle>
-                <CardDescription>Unverified claims are dropped and lower Claude's confidence. They never feed the evidence score.</CardDescription>
+                <CardTitle>LLM claims, checked against the data</CardTitle>
+                <CardDescription>Unverified claims are dropped and lower the LLM's confidence. They never feed the evidence score.</CardDescription>
               </CardHeader>
               <CardContent><ul className="space-y-2">{claims.map((e) => <ClaimItem key={e.id} e={e} />)}</ul></CardContent>
             </Card>

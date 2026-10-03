@@ -1,6 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/** Display name for an LLM provider id from the API ("claude", "gemini"). */
+export function llmLabel(provider: string | null | undefined): string {
+  return provider === "gemini" ? "Gemini" : "Claude";
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

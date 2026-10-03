@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/form";
 import { api, type Memory, type RecallResult } from "@/lib/api";
 import { useLoad } from "@/lib/hooks";
-import { fmtDate, humanize } from "@/lib/utils";
+import { fmtDate, humanize, llmLabel } from "@/lib/utils";
 
 const EXAMPLES = [
   "What's been going on with excavator 320-A's hydraulics?",
@@ -84,7 +84,9 @@ export function AskMachine() {
   const [busy, setBusy] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
 
-  useEffect(() => bottom.current?.scrollIntoView({ behavior: "smooth" }), [turns]);
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: "smooth" });
+  }, [turns]);
 
   const ask = async (question: string) => {
     if (!question.trim()) return;
@@ -130,7 +132,7 @@ export function AskMachine() {
                   {t.r && (
                     <>
                       <div className="mb-1.5 flex gap-1.5">
-                        <Badge tone={t.r.generated_by === "claude" ? "warn" : "neutral"}>{t.r.generated_by === "claude" ? "Claude" : "No LLM: memory listing"}</Badge>
+                        <Badge tone={t.r.generated_by !== "template" ? "warn" : "neutral"}>{t.r.generated_by !== "template" ? llmLabel(t.r.generated_by) : "No LLM: memory listing"}</Badge>
                         {!t.r.sufficient && <Badge tone="violet">memory insufficient</Badge>}
                       </div>
                       <AnswerText text={t.r.answer} memories={t.r.memories} />

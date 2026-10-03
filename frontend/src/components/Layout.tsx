@@ -1,7 +1,7 @@
 import { Bot, LayoutGrid, MessageSquareText, Sparkles, Upload } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useSession } from "@/lib/session";
-import { cn, ROLE_LABEL } from "@/lib/utils";
+import { cn, llmLabel, ROLE_LABEL } from "@/lib/utils";
 
 const NAV = [
   { to: "/", label: "Fleet", icon: LayoutGrid, end: true },
@@ -44,7 +44,7 @@ export function Layout() {
           <div className="flex items-center gap-2 text-xs">
             {meta?.llm_enabled ? (
               <>
-                <Sparkles className="size-3.5 text-amber-400" /> Claude connected
+                <Sparkles className="size-3.5 text-amber-400" /> {llmLabel(meta.llm_provider)} connected
               </>
             ) : (
               <>

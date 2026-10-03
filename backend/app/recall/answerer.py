@@ -31,7 +31,7 @@ class Answer:
     text: str
     cited: list[str]
     sufficient: bool
-    generated_by: str  # claude | template
+    generated_by: str  # claude | gemini | template
 
 
 SYSTEM = """You are the recall interface of Cat Track, a memory layer for heavy equipment. \
@@ -115,4 +115,4 @@ def answer_question(question: str, memories: list[Memory], llm: StructuredLLM | 
     if r.sufficient and not cited:
         log.warning("answer claimed sufficiency without citations")
         return template_answer(question, memories, filters)
-    return Answer(r.answer, sorted(cited), r.sufficient, "claude")
+    return Answer(r.answer, sorted(cited), r.sufficient, getattr(llm, "name", "claude"))

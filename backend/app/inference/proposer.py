@@ -164,10 +164,9 @@ def build_prompt(analysis: Analysis) -> str:
 
 
 class ClaudeProposer:
-    name = "claude"
-
     def __init__(self, llm: StructuredLLM):
         self.llm = llm
+        self.name = getattr(llm, "name", "claude")
 
     def propose(self, analysis: Analysis) -> list[Proposal]:
         if not analysis.signals:

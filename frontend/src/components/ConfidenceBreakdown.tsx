@@ -4,8 +4,8 @@ import { pct } from "@/lib/utils";
 const PARTS = [
   { key: "evidence", label: "Evidence engine", color: "bg-zinc-900", value: (c: Confidence) => c.evidence_score,
     hint: "Deterministic: thresholds, faults, trends, peers, notes" },
-  { key: "llm", label: "Claude (verified)", color: "bg-amber-500", value: (c: Confidence) => c.llm_confidence_verified,
-    hint: "Claude's confidence after unverified claims are removed" },
+  { key: "llm", label: "LLM (verified)", color: "bg-amber-500", value: (c: Confidence) => c.llm_confidence_verified,
+    hint: "The LLM's confidence after unverified claims are removed" },
   { key: "history", label: "History (base rate)", color: "bg-sky-500", value: (c: Confidence) => c.base_rate,
     hint: "How often this kind of finding was confirmed on similar machines" },
 ] as const;
@@ -54,12 +54,12 @@ export function ConfidenceBreakdown({ c }: { c: Confidence }) {
       </table>
       {c.weights.llm === 0 && (
         <p className="mt-2 text-[11px] text-zinc-500">
-          Produced without Claude, so the LLM term is dropped and its weight spread over the other two.
+          Produced without an LLM, so the LLM term is dropped and its weight spread over the other two.
         </p>
       )}
       {c.llm_confidence_raw > c.llm_confidence_verified && c.weights.llm > 0 && (
         <p className="mt-2 text-[11px] text-amber-700">
-          Claude stated {pct(c.llm_confidence_raw)}; reduced to {pct(c.llm_confidence_verified)} because some of its claims
+          The LLM stated {pct(c.llm_confidence_raw)}; reduced to {pct(c.llm_confidence_verified)} because some of its claims
           weren't backed by the data.
         </p>
       )}

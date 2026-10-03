@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     claude_fast_model: str = "claude-sonnet-5-5"
     claude_reasoning_model: str = "claude-opus-5-5"
+    # Used only when ANTHROPIC_API_KEY is not set
+    gemini_api_key: str | None = None
+    gemini_fast_model: str = "gemini-flash-latest"
+    gemini_reasoning_model: str = "gemini-flash-latest"
     config_dir: Path = BACKEND_DIR / "config"
 
     # fastembed BAAI/bge-small-en-v1.5 produces 384-dim vectors

@@ -194,7 +194,40 @@ def test_claude_client_uses_structured_output_and_handles_refusal(monkeypatch):
     assert calls[1]["model"] == "claude-opus-5-5"
 
 
+def test_gemini_client_validates_json_against_schema(monkeypatch):
+    calls = []
+
+    def fake_generate(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(text=fake_generate.text, usage_metadata=None,
+                               candidates=[SimpleNamespace(finish_reason="STOP")])
+
+    settings = SimpleNamespace(gemini_api_key="test", gemini_fast_model="gemini-fast",
+                               gemini_reasoning_model="gemini-reasoning")
+    llm = llm_client.GeminiLLM(settings)
+    monkeypatch.setattr(llm.client.models, "generate_content", fake_generate)
+
+    fake_generate.text = '{"proposals": []}'
+    assert llm.parse(tier="fast", system="s", prompt="p", schema=ProposalSet) == ProposalSet(proposals=[])
+    assert calls[0]["model"] == "gemini-fast"
+    assert calls[0]["config"].response_json_schema == ProposalSet.model_json_schema()
+
+    fake_generate.text = '{"wrong": 1}'
+    with pytest.raises(LLMError):
+        llm.parse(tier="reasoning", system="s", prompt="p", schema=ProposalSet)
+    assert calls[1]["model"] == "gemini-reasoning"
+
+
+def test_get_llm_picks_claude_then_gemini(monkeypatch):
+    both = SimpleNamespace(anthropic_api_key="a", gemini_api_key="g", claude_fast_model="c", claude_reasoning_model="c")
+    monkeypatch.setattr(llm_client, "get_settings", lambda: both)
+    assert llm_client.get_llm().name == "claude"
+    gemini_only = SimpleNamespace(anthropic_api_key=None, gemini_api_key="g")
+    monkeypatch.setattr(llm_client, "get_settings", lambda: gemini_only)
+    assert llm_client.get_llm().name == "gemini"
+
+
 def test_get_llm_without_key_returns_none(monkeypatch):
     monkeypatch.setattr(llm_client, "get_settings",
-                        lambda: SimpleNamespace(anthropic_api_key=None))
+                        lambda: SimpleNamespace(anthropic_api_key=None, gemini_api_key=None))
     assert llm_client.get_llm() is None
