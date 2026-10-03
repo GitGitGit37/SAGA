@@ -218,6 +218,30 @@ def test_gemini_client_validates_json_against_schema(monkeypatch):
     assert calls[1]["model"] == "gemini-reasoning"
 
 
+def test_gemini_client_falls_back_when_model_overloaded(monkeypatch):
+    from google.genai import errors
+
+    calls = []
+
+    def fake_generate(**kwargs):
+        calls.append(kwargs["model"])
+        if kwargs["model"] == "busy":
+            raise errors.ServerError(503, {"error": {"message": "high demand"}})
+        return SimpleNamespace(text='{"proposals": []}', usage_metadata=None,
+                               candidates=[SimpleNamespace(finish_reason="STOP")])
+
+    settings = SimpleNamespace(gemini_api_key="test", gemini_fast_model="busy",
+                               gemini_reasoning_model="busy", gemini_fallback_model="lite")
+    llm = llm_client.GeminiLLM(settings)
+    monkeypatch.setattr(llm.client.models, "generate_content", fake_generate)
+    assert llm.parse(tier="fast", system="s", prompt="p", schema=ProposalSet) == ProposalSet(proposals=[])
+    assert calls == ["busy", "lite"]
+
+    settings.gemini_fallback_model = "busy"
+    with pytest.raises(LLMError):
+        llm.parse(tier="fast", system="s", prompt="p", schema=ProposalSet)
+
+
 def test_get_llm_picks_claude_then_gemini(monkeypatch):
     both = SimpleNamespace(anthropic_api_key="a", gemini_api_key="g", claude_fast_model="c", claude_reasoning_model="c")
     monkeypatch.setattr(llm_client, "get_settings", lambda: both)

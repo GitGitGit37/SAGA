@@ -93,22 +93,29 @@ class GeminiLLM:
               effort: Effort = "medium", max_tokens: int = 16000) -> T:
         from google.genai import errors, types
 
-        model = self.model_for(tier)
-        try:
-            response = self.client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    max_output_tokens=max_tokens,
-                    response_mime_type="application/json",
-                    response_json_schema=schema.model_json_schema(),
-                ),
-            )
-        except errors.APIError as exc:
-            raise LLMError(f"Gemini API error {exc.code}: {exc.message}") from exc
-        except Exception as exc:  # network errors surface as httpx exceptions
-            raise LLMError(f"could not reach Gemini API: {exc}") from exc
+        config = types.GenerateContentConfig(
+            system_instruction=system,
+            max_output_tokens=max_tokens,
+            response_mime_type="application/json",
+            response_json_schema=schema.model_json_schema(),
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+        )
+        # Overloaded (503) or rate-limited (429): retry once on the fallback model.
+        models = [self.model_for(tier)]
+        fallback = getattr(self.settings, "gemini_fallback_model", None)
+        if fallback and fallback != models[0]:
+            models.append(fallback)
+        for i, model in enumerate(models):
+            try:
+                response = self.client.models.generate_content(model=model, contents=prompt, config=config)
+                break
+            except errors.APIError as exc:
+                if exc.code in (429, 503) and i + 1 < len(models):
+                    log.warning("gemini %s unavailable (%s); retrying on %s", model, exc.code, models[i + 1])
+                    continue
+                raise LLMError(f"Gemini API error {exc.code}: {exc.message}") from exc
+            except Exception as exc:  # network errors surface as httpx exceptions
+                raise LLMError(f"could not reach Gemini API: {exc}") from exc
 
         finish = response.candidates[0].finish_reason if response.candidates else None
         if finish == types.FinishReason.MAX_TOKENS:
