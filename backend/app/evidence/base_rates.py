@@ -8,8 +8,10 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session, aliased
 
 from app import config
-from app.db.enums import InferenceStatus
+from app.db.enums import Hypothesis, InferenceStatus
 from app.db.models import Asset, Inference
+
+PROBLEM_HYPOTHESES = [Hypothesis.degradation, Hypothesis.acute_failure]
 
 
 @dataclass
@@ -38,18 +40,27 @@ def beta_mean(confirmed: int, refuted: int, prior: float | None = None,
 
 
 def lookup_base_rate(db: Session, *, category: str, hypothesis: str, asset_type: str) -> BaseRate:
-    """confirmed: lineages with a version marked confirmed.
-    refuted: lineages whose later refinement version switched to a different hypothesis."""
+    """confirmed: lineages with a version marked confirmed, or (for problem hypotheses)
+               a later version saying a repair resolved it - the problem was real.
+    refuted:   lineages whose later refinement version switched to a different hypothesis."""
     similar = (select(Inference.lineage_id)
                .join(Asset, Asset.id == Inference.asset_id)
                .where(Inference.category == category, Inference.hypothesis == hypothesis,
                       Asset.asset_type == asset_type))
 
-    confirmed = db.scalar(
-        select(func.count(func.distinct(Inference.lineage_id)))
-        .where(Inference.lineage_id.in_(similar), Inference.status == InferenceStatus.confirmed)) or 0
-
     later = aliased(Inference)
+    confirmed_by_status = (select(Inference.lineage_id)
+                           .where(Inference.lineage_id.in_(similar), Inference.hypothesis == hypothesis,
+                                  Inference.status == InferenceStatus.confirmed))
+    confirmed_by_repair = (select(Inference.lineage_id)
+                           .join(later, and_(later.lineage_id == Inference.lineage_id,
+                                             later.version > Inference.version))
+                           .where(Inference.lineage_id.in_(similar), Inference.hypothesis == hypothesis,
+                                  Inference.hypothesis.in_(PROBLEM_HYPOTHESES),
+                                  later.hypothesis == Hypothesis.resolved))
+    confirmed = db.scalar(select(func.count()).select_from(
+        confirmed_by_status.union(confirmed_by_repair).subquery())) or 0
+
     refuted = db.scalar(
         select(func.count(func.distinct(Inference.lineage_id)))
         .join(later, and_(later.lineage_id == Inference.lineage_id, later.version > Inference.version))

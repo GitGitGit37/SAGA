@@ -19,6 +19,7 @@ from app.db.session import SessionLocal
 from app.evidence.base_rates import lookup_base_rate
 from app.evidence.context import DEFAULT_WINDOW_DAYS, load_context
 from app.evidence.engine import analyze
+from app.feedback.reconcile import reconcile_feedback
 from app.inference.categorize import categorize_observations
 from app.inference.pipeline import build_drafts
 from app.inference.proposer import ClaudeProposer, Proposer, RuleProposer
@@ -45,6 +46,8 @@ def run_for_asset(db: Session, asset: Asset, llm: StructuredLLM | None, *,
         inf = save_draft(db, asset, draft, created_by=created_by, change_reason=change_reason, actor=actor)
         if inf is not None:
             stored.append(inf)
+    if stored:
+        reconcile_feedback(db, asset)
     return stored
 
 

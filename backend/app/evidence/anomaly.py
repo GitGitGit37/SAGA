@@ -61,7 +61,7 @@ def detect_trends(ctx: AssetContext) -> list[Finding]:
             subsystem=meta["subsystem"],
             metric=metric,
             description=(
-                f"{meta['label']} shifted {'up' if sign * (window[metric].mean() - mu) > 0 else 'down'} "
+                f"{meta['label']} shifted {'up' if window[metric].mean() > mu else 'down'} "
                 f"vs this asset's baseline: window mean {window[metric].mean():.1f} vs baseline "
                 f"{mu:.1f} ± {sd:.1f} {meta['unit']} (z = {z:.1f}); {persistence:.0%} of window shifts "
                 f"beyond 2σ; slope {slope:+.2f} {meta['unit']}/day."

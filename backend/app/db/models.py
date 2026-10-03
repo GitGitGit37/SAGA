@@ -160,6 +160,7 @@ class Feedback(Base):
     feedback_type: Mapped[str] = mapped_column(String(32))  # FeedbackType
     rationale: Mapped[str | None] = mapped_column(Text)
     proposed_category: Mapped[str | None] = mapped_column(String(64))
+    proposed_hypothesis: Mapped[str | None] = mapped_column(String(32))
     proposed_interpretation: Mapped[str | None] = mapped_column(Text)
     attached_observation_ids: Mapped[list[int]] = mapped_column(JSONB, default=list)
 
@@ -168,6 +169,9 @@ class Feedback(Base):
     reliability_at_submission: Mapped[float | None] = mapped_column(Float)
     evidence_against: Mapped[float | None] = mapped_column(Float)
     weight: Mapped[float | None] = mapped_column(Float)
+    scores: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)  # combined-score breakdown
+    # Latest data the inference had seen when this feedback was given; later data judges it.
+    data_as_of: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     outcome: Mapped[str] = mapped_column(String(32), default=FeedbackOutcome.pending)
     system_response: Mapped[str | None] = mapped_column(Text)

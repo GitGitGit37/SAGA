@@ -14,8 +14,8 @@ human feedback as **evidence, not an override**.
 |---|---|---|
 | 1 | docker-compose, DB schema, seed generator | done |
 | 2 | Evidence Engine + inference pipeline | done |
-| 3 | Feedback & refinement | next |
-| 4 | Recall / "Ask the machine" | |
+| 3 | Feedback & refinement | done |
+| 4 | Recall / "Ask the machine" | next |
 | 5 | Frontend | |
 | 6 | Polish + demo script | |
 
@@ -108,10 +108,31 @@ weight = role_weight * user_reliability * (1 - evidence_strength_against_feedbac
 ```
 
 Role weights: operator 0.6, technician 1.0, fleet manager 0.8. Reliability starts at 0.5 and
-moves as later data confirms or refutes a user's past feedback. An inference is only revised
-when the alternative beats the current score by **0.15**; otherwise it is marked
-**contested** and the system explains why it is holding its position. Safety-critical
-inferences are never suppressed by feedback: disagreements escalate instead.
+moves 20% of the way toward 1 (or 0) each time later data confirms (or refutes) something the
+user said. `evidence_against` is how strongly the data supports what the feedback rejects, or
+contradicts what it proposes.
+
+**Revision rule** ([`app/feedback/refinement.py`](backend/app/feedback/refinement.py))
+
+```
+model(h)    = 0.625 * evidence_score(h) + 0.375 * base_rate(h)     same formula for every h
+combined(h) = model(h) + sum(weights endorsing h) - sum(weights rejecting h)
+revise only if combined(alternative) > combined(current) + 0.15
+```
+
+Otherwise the inference is marked **contested** and the system replies explaining why it is
+holding, citing evidence items, and naming the data that would settle it. On EX-320-A an
+operator saying "it's just the heat" gets weight 0.6 × 0.5 × (1 − 0.98) ≈ 0.006, so even ten
+such objections don't move it. On genuinely ambiguous data, a credible correction does win.
+
+- **New verifiable evidence** (an attached or submitted maintenance record) re-runs the whole
+  pipeline with that record. If the data then supports a different hypothesis, a new version
+  is created because of the data, not the opinion.
+- **Safety:** a safety-critical warning is never withdrawn or weakened by feedback, even if the
+  math would allow it. The item is marked contested and **escalated** in the UI; people decide
+  what to do with the machine. Raising an item to safety is always accepted.
+- Every feedback item, weight, score breakdown, status change and reliability update is
+  written to `audit_log`.
 
 ## Repository layout
 
