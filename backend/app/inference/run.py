@@ -30,9 +30,10 @@ from app.llm.client import StructuredLLM, get_llm
 def run_for_asset(db: Session, asset: Asset, llm: StructuredLLM | None, *,
                   as_of: datetime | None = None, window_days: int = DEFAULT_WINDOW_DAYS,
                   created_by: str = "pipeline", change_reason: str | None = None,
-                  actor: str = "system") -> list[Inference]:
+                  actor: str = "system", force_llm: bool = False) -> list[Inference]:
     """Categorise new observations, analyse, propose, verify, and store new versions.
-    Caller owns the transaction."""
+    force_llm stores the LLM's drafts as new versions even when the diagnosis is unchanged
+    (e.g. to replace rules-mode wording after an API key is added). Caller owns the transaction."""
     categorize_observations(db, asset, llm)
     ctx = load_context(db, asset, as_of=as_of, window_days=window_days)
     analysis = analyze(ctx)
@@ -43,7 +44,9 @@ def run_for_asset(db: Session, asset: Asset, llm: StructuredLLM | None, *,
 
     stored = []
     for draft in build_drafts(analysis, proposer, base_rate):
-        inf = save_draft(db, asset, draft, created_by=created_by, change_reason=change_reason, actor=actor)
+        force = force_llm and draft.proposer == proposer.name
+        inf = save_draft(db, asset, draft, created_by=created_by, actor=actor, force_new_version=force,
+                         change_reason=change_reason or (f"re-interpreted by {proposer.name}" if force else None))
         if inf is not None:
             stored.append(inf)
     if stored:
@@ -54,7 +57,9 @@ def run_for_asset(db: Session, asset: Asset, llm: StructuredLLM | None, *,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--asset", help="asset tag, e.g. EX-320-A (default: all)")
-    parser.add_argument("--rules", action="store_true", help="don't call Claude")
+    parser.add_argument("--rules", action="store_true", help="don't call the LLM")
+    parser.add_argument("--force", action="store_true",
+                        help="store the LLM's interpretation as a new version even if the diagnosis is unchanged")
     parser.add_argument("--window-days", type=int, default=DEFAULT_WINDOW_DAYS)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -71,7 +76,7 @@ def main() -> None:
         if not assets:
             raise SystemExit(f"no asset found{f' with tag {args.asset}' if args.asset else ''}")
         for asset in assets:
-            stored = run_for_asset(db, asset, llm, window_days=args.window_days)
+            stored = run_for_asset(db, asset, llm, window_days=args.window_days, force_llm=args.force)
             for inf in stored:
                 flag = " [SAFETY]" if inf.is_safety_critical else ""
                 print(f"{asset.asset_tag:9} v{inf.version} {inf.subsystem:15} {inf.hypothesis:18} "

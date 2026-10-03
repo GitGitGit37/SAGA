@@ -1,0 +1,16 @@
+[
+  {
+    "asset_tag": "EX-320-C",
+    "timestamp": "2026-10-02T17:30:00-05:00",
+    "kind": "inspection_note",
+    "author_role": "operator",
+    "text": "Boom and stick feel slower than usual once the machine warms up. Hydraulic oil smells hot at end of shift."
+  },
+  {
+    "asset_tag": "EX-320-C",
+    "timestamp": "2026-10-04T07:15:00-05:00",
+    "kind": "inspection_note",
+    "author_role": "technician",
+    "text": "Walkaround: hydraulic oil level about 4 L low, wet residue on the main pump case drain hose fitting. Topped up. Did not pressure-test; recommend pump and relief valve check."
+  }
+]

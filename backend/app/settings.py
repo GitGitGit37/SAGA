@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_fast_model: str = "gemini-flash-latest"
     gemini_reasoning_model: str = "gemini-flash-latest"
+    gemini_fallback_model: str = "gemini-flash-lite-latest"  # used when the main model is overloaded
     config_dir: Path = BACKEND_DIR / "config"
 
     # fastembed BAAI/bge-small-en-v1.5 produces 384-dim vectors
