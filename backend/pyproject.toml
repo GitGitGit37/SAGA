@@ -17,6 +17,7 @@ dependencies = [
     "pandas>=2.2",
     "scikit-learn>=1.5",
     "anthropic>=0.40",
+    "google-genai>=1.30",
     "fastembed>=0.4",
     "python-multipart>=0.0.9",
 ]

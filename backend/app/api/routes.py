@@ -65,6 +65,7 @@ def _refresh_memory(db: Session) -> None:
 @router.get("/meta")
 def meta(llm: StructuredLLM | None = Depends(llm_dep)) -> dict:
     return {"llm_enabled": llm is not None,
+            "llm_provider": getattr(llm, "name", None),
             "hypotheses": [h.value for h in Hypothesis],
             "categories": list(config.categories().keys()),
             "feedback_types": [t.value for t in FeedbackType],

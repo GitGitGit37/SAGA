@@ -61,7 +61,7 @@ def main() -> None:
 
     llm = None if args.rules else get_llm()
     if llm is None and not args.rules:
-        print("ANTHROPIC_API_KEY not set: using the rule-based proposer.")
+        print("No ANTHROPIC_API_KEY or GEMINI_API_KEY set: using the rule-based proposer.")
 
     with SessionLocal.begin() as db:
         query = select(Asset).order_by(Asset.asset_tag)

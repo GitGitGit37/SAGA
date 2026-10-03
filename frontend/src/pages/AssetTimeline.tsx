@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { api, type AssetDetail, type TimelineEvent } from "@/lib/api";
 import { useLoad } from "@/lib/hooks";
 import { useSession } from "@/lib/session";
-import { cn, fmtDate, fmtDateTime, humanize, pct } from "@/lib/utils";
+import { cn, fmtDate, fmtDateTime, humanize, llmLabel, pct } from "@/lib/utils";
 
 const METRICS = [
   { key: "coolant_temp_max_c", label: "Coolant temp (max)", unit: "°C" },
@@ -249,7 +249,7 @@ export function AssetTimeline() {
         actions={
           <Button onClick={analyze} disabled={running} variant="brand">
             <RefreshCw className={running ? "animate-spin" : ""} />
-            {running ? "Analysing…" : meta?.llm_enabled ? "Re-analyse with Claude" : "Re-analyse"}
+            {running ? "Analysing…" : meta?.llm_enabled ? `Re-analyse with ${llmLabel(meta.llm_provider)}` : "Re-analyse"}
           </Button>
         }
       />
