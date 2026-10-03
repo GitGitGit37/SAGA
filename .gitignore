@@ -16,8 +16,9 @@ venv/
 # Model caches
 .cache/
 
-# Generated seed data
-backend/seed/data/
+# Generated seed data (test_uploads/ is hand-made and tracked)
+backend/seed/data/*
+!backend/seed/data/test_uploads/
 
 # Node
 node_modules/
