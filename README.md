@@ -15,18 +15,37 @@ human feedback as **evidence, not an override**.
 | 1 | docker-compose, DB schema, seed generator | done |
 | 2 | Evidence Engine + inference pipeline | done |
 | 3 | Feedback & refinement | done |
-| 4 | Recall / "Ask the machine" | next |
-| 5 | Frontend | |
-| 6 | Polish + demo script | |
+| 4 | Recall / "Ask the machine" | done |
+| 5 | Frontend | done |
+| 6 | Polish + demo script | next |
 
-## Prerequisites
+## Quick start (Docker only)
 
-- Python 3.11+
-- Docker Desktop (for Postgres + pgvector)
-- Node.js 20+ (frontend, phase 5)
-- An Anthropic API key
+```bash
+cp .env.example .env      # optional: set ANTHROPIC_API_KEY to use Claude
+docker compose up -d      # Postgres + pgvector, FastAPI backend, React frontend
+```
 
-## Setup
+Open **http://localhost:5173**. On first start the backend applies migrations, loads the
+synthetic fleet, runs the pipeline and builds the recall index (the embedding model downloads
+once, ~70 MB). Without an API key everything works in rules mode; with one, Claude
+interprets the evidence, writes the replies to feedback and answers recall questions.
+Node.js is not needed on your machine: the frontend dev server runs in its container.
+
+| Page | What it shows |
+|---|---|
+| Fleet | Every machine's health, current beliefs, contested/escalated counts, recent faults |
+| Machine timeline | Telemetry with limits, confidence over time, every observation, inference and feedback item |
+| Inference | Interpretation, confidence breakdown, evidence with sources, Claude's checked claims, versions, feedback thread and form |
+| Ingest | Upload CSV/JSON/text; see each record's category and any memory updates |
+| Ask the machine | Questions answered only from stored memories, with citations |
+
+Use the "Acting as" switcher in the sidebar to give feedback as an operator, technician or
+fleet manager.
+
+## Local development (without the backend container)
+
+Prerequisites: Python 3.11+, Docker Desktop for Postgres.
 
 ```bash
 cp .env.example .env              # then set ANTHROPIC_API_KEY
@@ -41,7 +60,7 @@ alembic upgrade head              # create schema
 python -m seed.generate           # write synthetic data to seed/data/
 python -m seed.load --reset       # load it into Postgres
 python -m app.inference.run       # categorise + infer for every asset (--rules to skip Claude)
-uvicorn app.main:app --reload     # http://localhost:8000/health
+uvicorn app.main:app --reload     # http://localhost:8000/health, API under /api
 pytest                            # tests (no DB or API key needed)
 ```
 
@@ -134,17 +153,27 @@ such objections don't move it. On genuinely ambiguous data, a credible correctio
 - Every feedback item, weight, score breakdown, status change and reliability update is
   written to `audit_log`.
 
+## Recall
+
+Inferences and notes are embedded locally with fastembed (`BAAI/bge-small-en-v1.5`, 384-d)
+into pgvector. A question gets hybrid retrieval: vector similarity plus filters for asset,
+subsystem, status, date and safety, either passed explicitly or read from the question
+("excavator 320-A's hydraulics" → asset EX-320-A, subsystem hydraulics). Claude answers only
+from the retrieved memories and must cite them as `[I12]` (inference) or `[O45]` (note); an
+answer citing anything it wasn't given is discarded. If memory doesn't cover the question,
+the answer says so.
+
 ## Repository layout
 
 ```
 docker-compose.yml        Postgres + pgvector
 backend/
   config/                 thresholds, fault codes, categories, scoring weights (YAML)
-  app/                    FastAPI app: db models, ingest, evidence, inference, feedback, recall
+  app/                    FastAPI app: api, db models, ingest, evidence, inference, feedback, recall
   alembic/                migrations
   seed/                   synthetic data generator + loader
   tests/
-frontend/                 React + Vite (phase 5)
+frontend/                 React + TypeScript + Vite + Tailwind, shadcn-style components, Recharts
 ```
 
 Fault codes are modeled on SAE J1939 SPN-FMI pairs and thresholds are illustrative; neither is

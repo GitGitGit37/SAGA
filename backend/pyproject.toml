@@ -17,6 +17,8 @@ dependencies = [
     "pandas>=2.2",
     "scikit-learn>=1.5",
     "anthropic>=0.40",
+    "fastembed>=0.4",
+    "python-multipart>=0.0.9",
 ]
 
 [project.optional-dependencies]

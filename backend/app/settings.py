@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     # fastembed BAAI/bge-small-en-v1.5 produces 384-dim vectors
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
+    embedding_cache_dir: Path = BACKEND_DIR / ".cache" / "fastembed"
 
 
 @lru_cache

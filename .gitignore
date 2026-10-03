@@ -13,6 +13,9 @@ venv/
 .mypy_cache/
 .ruff_cache/
 
+# Model caches
+.cache/
+
 # Generated seed data
 backend/seed/data/
 
@@ -25,3 +28,4 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
